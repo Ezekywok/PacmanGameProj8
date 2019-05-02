@@ -7,10 +7,10 @@ import java.awt.image.DataBufferByte;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-public class Map {
+public class Map{
     private ArrayList<Location> walls = new ArrayList<>();
-    private LittleDot lilDot = new LittleDot();
-    private BigDot bigDot = new BigDot();
+    public LittleDot lilDot = new LittleDot();
+    public BigDot bigDot = new BigDot();
 
     public Map() throws IOException{
         BufferedImage toBeRendered = ImageIO.read(new File("src/map1.png"));
