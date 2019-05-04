@@ -21,7 +21,7 @@ public class Game {
 
     private Map map;
 
-    private static Clip clipEatDot, clipEatGhost;
+    private static Clip clipEatDot, clipEatGhost, clipVulnerableGhosts;
 
     public Game() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         grid = new Grid(25, 25);
@@ -37,9 +37,13 @@ public class Game {
         map = new Map();
         map.drawSelf(grid);
 
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("src/eatDotSound.wav").getAbsoluteFile());
+        AudioInputStream audioInputStream0 = AudioSystem.getAudioInputStream(new File("src/eatDotSound.wav").getAbsoluteFile());
         clipEatDot = AudioSystem.getClip();
-        clipEatDot.open(audioInputStream);
+        clipEatDot.open(audioInputStream0);
+
+        AudioInputStream audioInputStream1 = AudioSystem.getAudioInputStream(new File("src/allBlueGhostsMusic.wav").getAbsoluteFile());
+        clipVulnerableGhosts = AudioSystem.getClip();
+        clipVulnerableGhosts.open(audioInputStream1);
     }
 
     public void handleKeyPress() {
@@ -51,7 +55,7 @@ public class Game {
     public void play() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         introMusic();
         while (!isGameOver()) {
-            grid.pause(100);
+            grid.pause(250);//100
             handleKeyPress();
             updateTitle();
             msElapsed += 100;
@@ -72,6 +76,22 @@ public class Game {
     }
 
     private void changeUserDirection() {
+        if(userCol == 0 && userDirection == 2){
+            userCol = grid.getNumCols()-1;
+            grid.setImage(new Location(userRow,0), null);
+        }else if(userCol == grid.getNumCols()-1 && userDirection == 3){
+            userCol = 0;
+            grid.setImage(new Location(userRow,grid.getNumCols()-1), null);
+        }
+
+        if(userRow == 0 && userDirection == 1){
+            userRow = grid.getNumRows()-1;
+            grid.setImage(new Location(0,userCol), null);
+        }else if(userRow == grid.getNumRows()-1 && userDirection == 2){
+            userRow = 0;
+            grid.setImage(new Location(grid.getNumRows()-1,userCol), null);
+        }
+
         if (verifyAllValid(new Location(userRow - 1, userCol)) && userDirection == 0) {
             grid.setImage(new Location(userRow, userCol), null);
             userRow--;
@@ -89,6 +109,9 @@ public class Game {
             userCol++;
             grid.setImage(new Location(userRow, userCol), "pacRight.PNG");
         }
+
+
+
     }
 
     private boolean verifyAllValid(Location loc) {
@@ -109,6 +132,7 @@ public class Game {
             if (map.getBigDot().dotLocation.get(y).equals(new Location(userRow, userCol))) {
                 map.getBigDot().dotLocation.remove(y);
                 score += 10;
+                vulnerableGhosts();
                 // once the ghosts are created, uncomment this section
                 // grid.setImage(new Location(pinkRow, pinkCol), "EATghost.gif");
                 // grid.setImage(new Location(redRow, redCol), "EATghost.gif");
@@ -165,10 +189,7 @@ public class Game {
     }
 
     public static void vulnerableGhosts() throws UnsupportedAudioFileException, IOException, LineUnavailableException {
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("src/allBlueGhosts.wav").getAbsoluteFile());
-        Clip clip = AudioSystem.getClip();
-        clip.open(audioInputStream);
-        clip.loop(-1);
+        clipVulnerableGhosts.loop(3);
     }
 
     public static void main(String[] args) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
